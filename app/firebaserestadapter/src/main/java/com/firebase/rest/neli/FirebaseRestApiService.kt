@@ -3,7 +3,7 @@ package com.firebase.rest.neli
 import retrofit2.Call
 import retrofit2.http.*
 
-interface FirebaseRestApiService {
+internal interface FirebaseRestApiService {
 
     @Headers("Content-Type:application/json")
     @POST("verifyPassword")
