@@ -2,62 +2,63 @@ package com.firebase.rest.api
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import com.firebase.rest.neli.FirebaseDelegate
 import com.firebase.rest.neli.FirebaseRestApi
-import com.firebase.rest.neli.Model
-import org.json.JSONObject
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), FirebaseDelegate {
+class MainActivity : AppCompatActivity() {
 
     val API_KEY = "AIzaSyBWD9_bS4mgvHw_6OPCEx_I_AI8N6DIREk"
 //    val DATABASE_NAME = "los40new19-nbbddmodel"
     val DATABASE_NAME = "testdtse"
+    val firebaseRestApi = FirebaseRestApi(API_KEY)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        Handler().postDelayed(Runnable { FirebaseRestApi().doLogin(API_KEY,
-//            "test@user.com","123456", true, this) }
-//            ,1000)
-
-        Handler().postDelayed(Runnable { FirebaseRestApi().signInAnonymous(API_KEY, true, this) }
-            ,1000)
-    }
-
-    override fun onLoginSuccess(value: Model.LoginResponse) {
-        println("idToken: "+value.idToken)
-        FirebaseRestApi().getAccessToken(API_KEY,value.refreshToken, this)
-    }
-
-    override fun onLoginError() {
+        test002()
 
     }
 
-    override fun onAccessTokenSuccess(value: Model.AccessTokenResponse) {
-        println("Access Token: ${value.accessToken}")
-        FirebaseRestApi().getFromDatabase(DATABASE_NAME, value.accessToken,
-            ".json",this)
+    fun test002(){
+        GlobalScope.launch {
+            delay(1000)
+            try{
+                val result = firebaseRestApi.doLoginWithAccessToken("test@user.com",
+                    "123456", true)
+                println("accessToken: ${result.accessToken}")
+
+                val queryResult = firebaseRestApi.getFromDatabase(DATABASE_NAME,
+                    result.accessToken,".json")
+                println("Database: $queryResult")
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
+        }
     }
 
-    override fun onAccessTokenError() {
+    fun test001(){
+        GlobalScope.launch {
+            try{
+                delay(1000)
+                val result = firebaseRestApi.signInAnonymous(API_KEY, true)
+                println("Token: ${result.idToken}")
 
-    }
+                val loginResult = firebaseRestApi.doLogin("test@user.com", "123456", true)
+                println("Login result: ${loginResult.idToken}")
 
-    override fun onDatabaseRequestResponse(value: JSONObject) {
-        println("-----value: $value")
-    }
+                val accessToken = firebaseRestApi.getAccessToken(loginResult.refreshToken)
+                println("Access token: ${accessToken.accessToken}")
 
-    override fun onDatabaseRequestError() {
+                val queryResult = firebaseRestApi.getFromDatabase(DATABASE_NAME,
+                    accessToken.accessToken,".json")
+                println("Database: $queryResult")
 
-    }
 
-    override fun onAnonymousSignIn(value: Model.AnonymousSignInResponse) {
-        println("----onAnonymousSignIn")
-        FirebaseRestApi().getAccessToken(API_KEY, value.refreshToken, this)
-    }
-
-    override fun onAnonymousSignInFailure() {
-        println("---onAnonymousSignInFailure ")
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
+        }
     }
 }

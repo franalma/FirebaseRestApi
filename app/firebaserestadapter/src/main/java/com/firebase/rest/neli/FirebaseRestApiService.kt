@@ -7,12 +7,13 @@ interface FirebaseRestApiService {
 
     @Headers("Content-Type:application/json")
     @POST("verifyPassword")
-    fun doLogin(@Query("key") key:String, @Body loginBody:Model.LoginBody): Call<Model.LoginResponse>
+    fun doLogin(@Query("key") key:String, @Body loginBody: FirebaseRestApi.LoginBody): Call<LoginResponse>
 
     @Headers("Content-Type:application/json")
     @POST("token")
     fun getAccessToken(@Query("key") key:String,
-                       @Body accessTokenBody:Model.AccessTokenBody): Call<Model.AccessTokenResponse>
+                       @Body accessTokenBody: FirebaseRestApi.AccessTokenBody
+    ): Call<AccessTokenResponse>
 
     @GET
     fun getFromDatabase(@Url url:String, @Query("auth")accessToken:String): Call<Any>
@@ -20,5 +21,6 @@ interface FirebaseRestApiService {
     @Headers("Content-Type:application/json")
     @POST
     fun doSignInAnonymous(@Url url:String, @Query("key") apiKey:String,
-                          @Body body:Model.AnonymousSignIn): Call<Model.AnonymousSignInResponse>
+                          @Body body: FirebaseRestApi.AnonymousSignIn
+    ): Call<AnonymousSignInResponse>
 }
