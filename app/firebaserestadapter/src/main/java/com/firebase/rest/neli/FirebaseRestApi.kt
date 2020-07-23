@@ -110,14 +110,13 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
             }
         } ?: throw IllegalStateException("Access token is null")
 
-    suspend fun signInAnonymous(returnSecureToken: Boolean = true): AnonymousSignInResponse =
+    private suspend fun signInAnonymousInternal(returnSecureToken: Boolean = true): AnonymousSignInResponse =
         suspendCoroutine { continuation ->
-            Log.d("FirebaseRestApi", "signInAnonymous")
+            Log.d("FirebaseRestApi", "signInAnonymousInternal")
             val url = "https://identitytoolkit.googleapis.com/v1/"
             val fullUrl = url + "accounts:signUp"
             val service = getRetroFitInstance(url).create(FirebaseRestApiService::class.java)
             val body = AnonymousSignIn(returnSecureToken)
-
             service.doSignInAnonymous(fullUrl, apiKey, body)
                 .enqueue(object : Callback<AnonymousSignInResponse> {
                     override fun onFailure(call: Call<AnonymousSignInResponse>, t: Throwable) {
@@ -139,6 +138,11 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
         accessToken = getAccessToken(loginResult.refreshToken)
     }
 
+    suspend fun signInAnonymous(returnSecureToken: Boolean = true){
+        Log.d("FirebaseRestApi", "signInAnonymous")
+        val loginResult = this.signInAnonymousInternal(returnSecureToken)
+        accessToken = getAccessToken(loginResult.refreshToken)
+    }
 
 }
 
