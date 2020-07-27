@@ -2,7 +2,10 @@ package com.firebase.rest.neli
 
 import android.util.Log
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONArray
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -95,16 +98,19 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
     suspend fun get(databasePath: String): String =
         accessToken?.let {
             suspendCoroutine<String> { continuation ->
-                Log.d("FirebaseRestApi", "get")
-                val url = "$database$databasePath/"
+
+                val url = "$database$databasePath/.json/"
+                Log.d("FirebaseRestApi", "get::url $url")
                 val service = getRetroFitInstance(url).create(FirebaseRestApiService::class.java)
-                service.getFromDatabase(url, it.accessToken).enqueue(object : Callback<Any> {
-                    override fun onFailure(call: Call<Any>, t: Throwable) {
+                service.getFromDatabase(url, it.accessToken).enqueue(object : Callback<ResponseBody> {
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        Log.e("FirebaseRestApi", "get error::",t)
                         continuation.resumeWithException(t)
                     }
-
-                    override fun onResponse(call: Call<Any>, response: Response<Any>) {
-                        continuation.resume(response.body().toString())
+                    override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                        Log.d("FirebaseRestApi", "get::${response.body()!!::class.java}")
+                        val result = response.body()!!.string()
+                        continuation.resume(result)
                     }
                 })
             }
@@ -142,6 +148,7 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
         Log.d("FirebaseRestApi", "signInAnonymous")
         val loginResult = this.signInAnonymousInternal(returnSecureToken)
         accessToken = getAccessToken(loginResult.refreshToken)
+
     }
 
 }

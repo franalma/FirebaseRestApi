@@ -9,53 +9,41 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    val API_KEY = "AIzaSyBWD9_bS4mgvHw_6OPCEx_I_AI8N6DIREk"
-//    val DATABASE_NAME = "los40new19-nbbddmodel"
-    val DATABASE_NAME = "testdtse"
-    val firebaseRestApi = FirebaseRestApi(API_KEY)
+    val API_KEY_TEST = "AIzaSyBWD9_bS4mgvHw_6OPCEx_I_AI8N6DIREk"
+    val DATABASE_NAME_TEST = "https://testdtse.firebaseio.com/"
+    val firebaseRestApiTest = FirebaseRestApi(DATABASE_NAME_TEST,API_KEY_TEST)
+    val API_KEY = "AIzaSyAsxhcBcT-0ZrXZGS4qBl1YTy5mbqJjl04"
+    val DATABASE_NAME = "https://los40new19-nbbddmodel.firebaseio.com/"
+    val firebaseRestApi = FirebaseRestApi(DATABASE_NAME,API_KEY)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        test002()
-
+        testAnonymousLos40()
+//        testAnonymousHuawei()
     }
 
-    fun test002(){
+    fun testAnonymousLos40(){
         GlobalScope.launch {
             delay(1000)
             try{
-                val result = firebaseRestApi.doLoginWithAccessToken("test@user.com",
-                    "123456", true)
-                println("accessToken: ${result.accessToken}")
+                firebaseRestApi.signInAnonymous()
+                println("------>App: ${firebaseRestApi.get("settings/splash/")}")
+                println("------>App: ${firebaseRestApi.get("settings/constants/")}")
 
-                val queryResult = firebaseRestApi.getFromDatabase(DATABASE_NAME,
-                    result.accessToken,".json")
-                println("Database: $queryResult")
             }catch (e:Exception){
                 e.printStackTrace()
             }
         }
     }
 
-    fun test001(){
+    fun testAnonymousHuawei(){
         GlobalScope.launch {
+            delay(1000)
             try{
-                delay(1000)
-                val result = firebaseRestApi.signInAnonymous(API_KEY, true)
-                println("Token: ${result.idToken}")
-
-                val loginResult = firebaseRestApi.doLogin("test@user.com", "123456", true)
-                println("Login result: ${loginResult.idToken}")
-
-                val accessToken = firebaseRestApi.getAccessToken(loginResult.refreshToken)
-                println("Access token: ${accessToken.accessToken}")
-
-                val queryResult = firebaseRestApi.getFromDatabase(DATABASE_NAME,
-                    accessToken.accessToken,".json")
-                println("Database: $queryResult")
-
-
+                firebaseRestApiTest.signInAnonymous()
+                val response = firebaseRestApiTest.get(".json")
+                println("-----$response")
             }catch (e:Exception){
                 e.printStackTrace()
             }

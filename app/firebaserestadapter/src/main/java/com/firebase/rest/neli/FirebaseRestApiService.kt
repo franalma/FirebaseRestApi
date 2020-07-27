@@ -1,5 +1,7 @@
 package com.firebase.rest.neli
 
+import okhttp3.ResponseBody
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -16,7 +18,7 @@ internal interface FirebaseRestApiService {
     ): Call<AccessTokenResponse>
 
     @GET
-    fun getFromDatabase(@Url url:String, @Query("auth")accessToken:String): Call<Any>
+    fun getFromDatabase(@Url url:String, @Query("auth")accessToken:String): Call<ResponseBody>
 
     @Headers("Content-Type:application/json")
     @POST
