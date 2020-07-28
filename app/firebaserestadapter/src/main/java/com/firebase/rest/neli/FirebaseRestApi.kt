@@ -26,6 +26,7 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
 
     internal data class AccessTokenBody(val grantType: String, val refreshToken: String)
     internal data class AnonymousSignIn(val returnSecureToken: Boolean)
+    internal data class DatabaseValueBody(val data:String)
 
     private var accessToken: AccessTokenResponse? = null
     private val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
@@ -108,13 +109,40 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
                         continuation.resumeWithException(t)
                     }
                     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                        Log.d("FirebaseRestApi", "get::${response.body()!!::class.java}")
+                        Log.d("FirebaseRestApi", "url: $url get::${response.body()!!::class.java}")
                         val result = response.body()!!.string()
                         continuation.resume(result)
                     }
                 })
             }
         } ?: throw IllegalStateException("Access token is null")
+
+
+    suspend fun set(databasePath: String, data:String){
+        accessToken?.let {
+            suspendCoroutine <String>{ continuation->
+                val url = "$database$databasePath/.json/"
+                Log.d("FirebaseRestApi", "set data: $data")
+                Log.d("FirebaseRestApi", "set::url $url")
+                val service = getRetroFitInstance(url).create(FirebaseRestApiService::class.java)
+                service.setInDatabase(url, it.accessToken,FirebaseRestApi.DatabaseValueBody(data)).enqueue(object :Callback<ResponseBody>{
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        Log.e("FirebaseRestApi", "set error::",t)
+                        continuation.resumeWithException(t)
+                    }
+                    override fun onResponse(
+                        call: Call<ResponseBody>,
+                        response: Response<ResponseBody>
+                    ) {
+                        response.body().let {
+                            Log.d("FirebaseRestApi", "url: $url set::${response.body()!!::class.java}")
+                            continuation.resume(response.body()!!.string())
+                        }
+                    }
+                })
+            }
+        }
+    }
 
     private suspend fun signInAnonymousInternal(returnSecureToken: Boolean = true): AnonymousSignInResponse =
         suspendCoroutine { continuation ->
@@ -133,6 +161,7 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
                         call: Call<AnonymousSignInResponse>,
                         response: Response<AnonymousSignInResponse>
                     ) {
+
                         response.body()?.let { continuation.resume(it) }
                     }
                 })

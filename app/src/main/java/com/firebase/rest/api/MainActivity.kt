@@ -6,6 +6,7 @@ import com.firebase.rest.neli.FirebaseRestApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,8 +20,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        testAnonymousLos40()
-//        testAnonymousHuawei()
+//        testAnonymousLos40()
+        testAnonymousHuawei()
     }
 
     fun testAnonymousLos40(){
@@ -42,8 +43,13 @@ class MainActivity : AppCompatActivity() {
             delay(1000)
             try{
                 firebaseRestApiTest.signInAnonymous()
-                val response = firebaseRestApiTest.get(".json")
+                var response = firebaseRestApiTest.get("")
                 println("-----$response")
+                val joc = JSONObject()
+                joc.put("user6", "test6")
+                firebaseRestApiTest.set("",joc.toString() )
+                response = firebaseRestApiTest.get("")
+                println("----$response")
             }catch (e:Exception){
                 e.printStackTrace()
             }

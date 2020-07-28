@@ -25,4 +25,9 @@ internal interface FirebaseRestApiService {
     fun doSignInAnonymous(@Url url:String, @Query("key") apiKey:String,
                           @Body body: FirebaseRestApi.AnonymousSignIn
     ): Call<AnonymousSignInResponse>
+
+    @Headers("Content-Type:application/json")
+    @PATCH
+    fun setInDatabase(@Url url: String, @Query("auth")accessToken: String,
+                      @Body value:FirebaseRestApi.DatabaseValueBody): Call<ResponseBody>
 }
