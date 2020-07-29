@@ -1,5 +1,6 @@
 package com.firebase.rest.neli
 
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.Call
@@ -29,5 +30,5 @@ internal interface FirebaseRestApiService {
     @Headers("Content-Type:application/json")
     @PATCH
     fun setInDatabase(@Url url: String, @Query("auth")accessToken: String,
-                      @Body value:FirebaseRestApi.DatabaseValueBody): Call<ResponseBody>
+                      @Body value:RequestBody): Call<ResponseBody>
 }

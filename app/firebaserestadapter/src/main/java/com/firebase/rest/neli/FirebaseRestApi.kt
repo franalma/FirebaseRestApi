@@ -1,7 +1,9 @@
 package com.firebase.rest.neli
 
 import android.util.Log
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONArray
@@ -11,6 +13,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.QueryMap
 import java.lang.IllegalStateException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -26,7 +29,7 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
 
     internal data class AccessTokenBody(val grantType: String, val refreshToken: String)
     internal data class AnonymousSignIn(val returnSecureToken: Boolean)
-    internal data class DatabaseValueBody(val data:String)
+    internal data class DatabaseValueBody(val data:RequestBody)
 
     private var accessToken: AccessTokenResponse? = null
     private val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
@@ -125,7 +128,8 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
                 Log.d("FirebaseRestApi", "set data: $data")
                 Log.d("FirebaseRestApi", "set::url $url")
                 val service = getRetroFitInstance(url).create(FirebaseRestApiService::class.java)
-                service.setInDatabase(url, it.accessToken,FirebaseRestApi.DatabaseValueBody(data)).enqueue(object :Callback<ResponseBody>{
+                val body = RequestBody.create("application/json;charset=utf-8".toMediaTypeOrNull(),JSONObject(data).toString())
+                service.setInDatabase(url, it.accessToken,body).enqueue(object :Callback<ResponseBody>{
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                         Log.e("FirebaseRestApi", "set error::",t)
                         continuation.resumeWithException(t)
