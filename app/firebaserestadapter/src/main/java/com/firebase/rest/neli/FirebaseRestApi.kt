@@ -24,8 +24,8 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
             this.level = HttpLoggingInterceptor.Level.NONE
         }
     }
-    private var auth:FirebaseRestAuth? = null
-    private var retrofit:Retrofit? = null
+    private var auth:FirebaseRestAuth
+    private var retrofit:Retrofit
 
     init {
         val client: OkHttpClient = OkHttpClient.Builder().apply {
@@ -40,28 +40,27 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
     }
 
     suspend fun doLogin(user: String, pass: String, returnSecureToken: Boolean): LoginResponse =
-            auth?.doLogin(user, pass,returnSecureToken)!!
+            auth.doLogin(user, pass,returnSecureToken)
 
 
-    fun isLogged() = auth?.isLogged()
+    fun isLogged() = auth.isLogged()
 
     suspend fun doLoginWithAccessToken(user: String, pass: String, returnSecureToken: Boolean) {
-        auth?.doLoginWithAccessToken(user, pass, returnSecureToken)
+        auth.doLoginWithAccessToken(user, pass, returnSecureToken)
     }
 
     suspend fun signInAnonymous(returnSecureToken: Boolean = true){
-     auth?.signInAnonymous(returnSecureToken)
+     auth.signInAnonymous(returnSecureToken)
     }
 
     suspend fun get(databasePath: String): String =
-        auth?.accessToken.let {
-            auth?.refreshTokenIfNeeded()
+        auth.accessToken.let {
+            auth.refreshTokenIfNeeded()
             suspendCoroutine<String> { continuation ->
                 val url = "$database$databasePath/.json/"
                 Log.d("FirebaseRestApi", "get::url $url")
-                val service = retrofit?.create(FirebaseRestApiService::class.java)
-
-                service?.getFromDatabase(url, it!!.accessToken)?.enqueue(object : Callback<ResponseBody> {
+                val service = retrofit.create(FirebaseRestApiService::class.java)
+                service.getFromDatabase(url, it!!.accessToken).enqueue(object : Callback<ResponseBody> {
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                         Log.e("FirebaseRestApi", "get error::",t)
                         continuation.resumeWithException(t)
@@ -76,14 +75,14 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
         } ?: throw IllegalStateException("Access token is null")
 
     suspend fun set(databasePath: String, data:Any){
-        auth?.refreshTokenIfNeeded()
-        auth?.accessToken?.let {
+        auth.refreshTokenIfNeeded()
+        auth.accessToken?.let {
             suspendCoroutine <String>{ continuation->
                 val url = "$database$databasePath/.json/"
                 Log.d("FirebaseRestApi", "set data: $data")
                 Log.d("FirebaseRestApi", "set::url $url")
-                val service = retrofit?.create(FirebaseRestApiService::class.java)
-                service?.setInDatabase(url, it.accessToken,data)?.enqueue(object :Callback<ResponseBody>{
+                val service = retrofit.create(FirebaseRestApiService::class.java)
+                service.setInDatabase(url, it.accessToken,data).enqueue(object :Callback<ResponseBody>{
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                         Log.e("FirebaseRestApi", "set error::",t)
                         continuation.resumeWithException(t)
