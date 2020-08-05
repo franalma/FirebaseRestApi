@@ -32,8 +32,11 @@ internal class FirebaseRestAuth(private val apiKey: String) {
     }
 
     internal data class LoginBody(
+        @SerializedName("email")
         val email: String,
+        @SerializedName("password")
         val password: String,
+        @SerializedName("return_secure_token")
         val returnSecureToken: Boolean
     )
 
@@ -44,7 +47,10 @@ internal class FirebaseRestAuth(private val apiKey: String) {
         val refreshToken: String?
     )
 
-    internal data class AnonymousSignIn(val returnSecureToken: Boolean)
+    internal data class AnonymousSignIn(
+        @SerializedName("return_secure_token")
+        val returnSecureToken: Boolean
+    )
 
     private var client: OkHttpClient = OkHttpClient.Builder().apply {
         this.addInterceptor(interceptor)
