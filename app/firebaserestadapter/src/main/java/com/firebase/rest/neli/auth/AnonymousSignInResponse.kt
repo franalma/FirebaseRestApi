@@ -8,7 +8,7 @@ data class AnonymousSignInResponse(
     @SerializedName("idToken")
     val idToken: String,
     @SerializedName("refreshToken")
-    val refreshToken: String?,
+    val refreshToken: String,
     @SerializedName("expiresIn")
     val expiresIn: String,
     @SerializedName("localId")
