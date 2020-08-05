@@ -1,6 +1,7 @@
 package com.firebase.rest.neli
 
 import android.util.Log
+import com.firebase.rest.neli.auth.FirebaseRestAuth
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor

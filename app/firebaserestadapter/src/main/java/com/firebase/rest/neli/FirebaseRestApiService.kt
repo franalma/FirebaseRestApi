@@ -1,5 +1,7 @@
 package com.firebase.rest.neli
 
+import com.firebase.rest.neli.auth.AnonymousSignInResponse
+import com.firebase.rest.neli.auth.FirebaseRestAuth
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*

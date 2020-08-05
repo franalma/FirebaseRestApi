@@ -1,7 +1,10 @@
-package com.firebase.rest.neli
+package com.firebase.rest.neli.auth
 
 import android.util.Log
-import com.google.gson.annotations.SerializedName
+import com.firebase.rest.neli.AccessTokenResponse
+import com.firebase.rest.neli.BuildConfig
+import com.firebase.rest.neli.FirebaseRestApiService
+import com.firebase.rest.neli.LoginResponse
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -21,40 +24,23 @@ internal class FirebaseRestAuth(private val apiKey: String) {
         const val ACCESS_TOKEN_URL = "https://securetoken.googleapis.com/v1/"
     }
 
-    var accessToken: AccessTokenResponse? = null
+    internal var accessToken: AccessTokenResponse? = null
     private var expiredTime: Long = 0
-    private val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
-        if (BuildConfig.DEBUG) {
-            this.level = HttpLoggingInterceptor.Level.BODY
-        } else {
-            this.level = HttpLoggingInterceptor.Level.NONE
+    private val interceptor: HttpLoggingInterceptor by lazy {
+        HttpLoggingInterceptor().apply {
+            if (BuildConfig.DEBUG) {
+                this.level = HttpLoggingInterceptor.Level.BODY
+            } else {
+                this.level = HttpLoggingInterceptor.Level.NONE
+            }
         }
     }
 
-    internal data class LoginBody(
-        @SerializedName("email")
-        val email: String,
-        @SerializedName("password")
-        val password: String,
-        @SerializedName("return_secure_token")
-        val returnSecureToken: Boolean
-    )
-
-    internal data class AccessTokenBody(
-        @SerializedName("grant_type")
-        val grantType: String,
-        @SerializedName("refresh_token")
-        val refreshToken: String?
-    )
-
-    internal data class AnonymousSignIn(
-        @SerializedName("return_secure_token")
-        val returnSecureToken: Boolean
-    )
-
-    private var client: OkHttpClient = OkHttpClient.Builder().apply {
-        this.addInterceptor(interceptor)
-    }.build()
+    private val client: OkHttpClient by lazy {
+        OkHttpClient.Builder().apply {
+            this.addInterceptor(interceptor)
+        }.build()
+    }
 
     private fun getRetroFitInstance(url: String): Retrofit {
         return Retrofit.Builder()
@@ -68,8 +54,14 @@ internal class FirebaseRestAuth(private val apiKey: String) {
         suspendCoroutine { continuation ->
             Log.d("FirebaseRestApi", "getAccessToken")
             val service =
-                getRetroFitInstance(ACCESS_TOKEN_URL).create(FirebaseRestApiService::class.java)
-            val accessTokenBody = AccessTokenBody("refresh_token", refreshToken)
+                getRetroFitInstance(ACCESS_TOKEN_URL).create(
+                    FirebaseRestApiService::class.java
+                )
+            val accessTokenBody =
+                AccessTokenBody(
+                    "refresh_token",
+                    refreshToken
+                )
             service.getAccessToken(apiKey, accessTokenBody)
                 .enqueue(object : Callback<AccessTokenResponse> {
                     override fun onFailure(call: Call<AccessTokenResponse>, t: Throwable) {
@@ -91,8 +83,15 @@ internal class FirebaseRestAuth(private val apiKey: String) {
     suspend fun doLogin(user: String, pass: String, returnSecureToken: Boolean): LoginResponse =
         suspendCoroutine { continuation ->
 
-            val service = getRetroFitInstance(LOGIN_URL).create(FirebaseRestApiService::class.java)
-            val loginBody = LoginBody(user, pass, returnSecureToken)
+            val service = getRetroFitInstance(LOGIN_URL).create(
+                FirebaseRestApiService::class.java
+            )
+            val loginBody =
+                LoginBody(
+                    user,
+                    pass,
+                    returnSecureToken
+                )
             service.doLogin(apiKey, loginBody).enqueue(object :
                 Callback<LoginResponse> {
                 override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
@@ -120,8 +119,13 @@ internal class FirebaseRestAuth(private val apiKey: String) {
 
             val fullUrl = LOGIN_URL_ANON + "accounts:signUp"
             val service =
-                getRetroFitInstance(LOGIN_URL_ANON).create(FirebaseRestApiService::class.java)
-            val body = AnonymousSignIn(returnSecureToken)
+                getRetroFitInstance(LOGIN_URL_ANON).create(
+                    FirebaseRestApiService::class.java
+                )
+            val body =
+                AnonymousSignIn(
+                    returnSecureToken
+                )
             service.doSignInAnonymous(fullUrl, apiKey, body)
                 .enqueue(object : Callback<AnonymousSignInResponse> {
                     override fun onFailure(call: Call<AnonymousSignInResponse>, t: Throwable) {

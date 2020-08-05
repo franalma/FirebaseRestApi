@@ -1,4 +1,4 @@
-package com.firebase.rest.neli
+package com.firebase.rest.neli.auth
 
 import com.google.gson.annotations.SerializedName
 
