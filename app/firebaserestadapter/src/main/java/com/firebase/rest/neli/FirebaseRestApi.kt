@@ -44,7 +44,6 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
     suspend fun doLogin(user: String, pass: String, returnSecureToken: Boolean): LoginResponse =
         auth.doLogin(user, pass, returnSecureToken)
 
-
     fun isLogged() = auth.isLogged()
 
     suspend fun doLoginWithAccessToken(user: String, pass: String, returnSecureToken: Boolean) {

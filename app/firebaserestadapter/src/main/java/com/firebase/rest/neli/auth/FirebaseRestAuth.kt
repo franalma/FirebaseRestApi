@@ -12,6 +12,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -46,13 +47,14 @@ internal class FirebaseRestAuth(private val apiKey: String) {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-    private suspend fun getAccessToken(refreshToken: String?): AccessTokenResponse =
+    private suspend fun getAccessToken(refreshToken: String): AccessTokenResponse =
         suspendCoroutine { continuation ->
             Log.d(TAG, "getAccessToken")
             val accessTokenBody = AccessTokenBody(
                     "refresh_token",
                     refreshToken
                 )
+            Log.d(TAG, "getAccessToken: $accessTokenBody")
             firebaseRestApiService(ACCESS_TOKEN_URL).getAccessToken(apiKey, accessTokenBody)
                 .enqueue(continuation) { _, response ->
                     response.body()?.let {
@@ -86,6 +88,7 @@ internal class FirebaseRestAuth(private val apiKey: String) {
             val body = AnonymousSignIn(returnSecureToken)
             firebaseRestApiService(LOGIN_URL_ANON).doSignInAnonymous(fullUrl, apiKey, body)
                 .enqueue(continuation) { _, response ->
+                    Log.d(TAG, "signInAnonymousInternal: ${response.body()}")
                     response.body()?.let { continuation.resume(it) }
                 }
         }
@@ -102,6 +105,7 @@ internal class FirebaseRestAuth(private val apiKey: String) {
     suspend fun signInAnonymous(returnSecureToken: Boolean = true) {
         Log.d(TAG, "signInAnonymous")
         val loginResult = signInAnonymousInternal(returnSecureToken)
+        Log.d(TAG, "signInAnonymous: $loginResult")
         accessToken = getAccessToken(loginResult.refreshToken)
 
     }
@@ -115,14 +119,21 @@ internal class FirebaseRestAuth(private val apiKey: String) {
         }
     }
 
-    private fun <T> Call<T>.enqueue(continuation: Continuation<T>, success: (Call<T>, response: Response<T>) -> Unit) {
+    private inline fun <T> Call<T>.enqueue(
+        continuation: Continuation<T>,
+        crossinline success: (Call<T>, response: Response<T>) -> Unit
+    ) {
         enqueue(
             object : Callback<T> {
                 override fun onFailure(call: Call<T>, t: Throwable) {
                     continuation.resumeWithException(t)
                 }
                 override fun onResponse(call: Call<T>, response: Response<T>) {
-                    success(call, response)
+                    if (response.isSuccessful) {
+                        success(call, response)
+                    } else {
+                        continuation.resumeWithException(IOException("Request failed with error code ${response.code()}"))
+                    }
                 }
             }
         )
