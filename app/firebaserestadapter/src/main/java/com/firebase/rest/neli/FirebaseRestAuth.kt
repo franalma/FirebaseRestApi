@@ -51,7 +51,7 @@ internal class FirebaseRestAuth(private val apiKey: String) {
             .build()
     }
 
-    private suspend fun getAccessToken(refreshToken: String): AccessTokenResponse =
+     suspend fun getAccessToken(refreshToken: String): AccessTokenResponse =
         suspendCoroutine { continuation ->
             Log.d("FirebaseRestApi", "getAccessToken")
             val service = getRetroFitInstance(ACCESS_TOKEN_URL).create(FirebaseRestApiService::class.java)
@@ -61,7 +61,6 @@ internal class FirebaseRestAuth(private val apiKey: String) {
                     override fun onFailure(call: Call<AccessTokenResponse>, t: Throwable) {
                         continuation.resumeWithException(t)
                     }
-
                     override fun onResponse(
                         call: Call<AccessTokenResponse>,
                         response: Response<AccessTokenResponse>
@@ -82,6 +81,7 @@ internal class FirebaseRestAuth(private val apiKey: String) {
             service.doLogin(apiKey, loginBody).enqueue(object :
                 Callback<LoginResponse> {
                 override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                    Log.d("FirebaseRestAuth", "doLogin failed: $t")
                     continuation.resumeWithException(t)
                 }
 
@@ -89,7 +89,10 @@ internal class FirebaseRestAuth(private val apiKey: String) {
                     call: Call<LoginResponse>,
                     response: Response<LoginResponse>
                 ) {
-                    response.body()?.let { continuation.resume(it) }
+
+                    response.body()?.let {
+                        Log.d("FirebaseRestAuth", "doLogin response: $it")
+                        continuation.resume(it) }
                 }
             })
         }
@@ -127,6 +130,8 @@ internal class FirebaseRestAuth(private val apiKey: String) {
         val loginResult = this.doLogin(user, pass, returnSecureToken)
         accessToken = getAccessToken(loginResult.refreshToken)
     }
+
+
 
     suspend fun signInAnonymous(returnSecureToken: Boolean = true){
         Log.d("FirebaseRestApi", "signInAnonymous")
