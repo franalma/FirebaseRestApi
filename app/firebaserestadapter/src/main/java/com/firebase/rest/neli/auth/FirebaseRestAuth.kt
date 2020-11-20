@@ -1,10 +1,8 @@
 package com.firebase.rest.neli.auth
 
 import android.util.Log
-import com.firebase.rest.neli.AccessTokenResponse
 import com.firebase.rest.neli.BuildConfig
 import com.firebase.rest.neli.FirebaseRestApiService
-import com.firebase.rest.neli.LoginResponse
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
