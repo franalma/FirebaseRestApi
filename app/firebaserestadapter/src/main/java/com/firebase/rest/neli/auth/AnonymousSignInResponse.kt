@@ -1,16 +1,16 @@
-package com.firebase.rest.neli
+package com.firebase.rest.neli.auth
 
 import com.google.gson.annotations.SerializedName
 
 data class AnonymousSignInResponse(
     @SerializedName("kind")
-    val kind:String,
+    val kind: String,
     @SerializedName("idToken")
-    val idToken:String,
+    val idToken: String,
     @SerializedName("refreshToken")
     val refreshToken: String,
     @SerializedName("expiresIn")
-    val expiresIn:String,
+    val expiresIn: String,
     @SerializedName("localId")
     val localId: String
 )

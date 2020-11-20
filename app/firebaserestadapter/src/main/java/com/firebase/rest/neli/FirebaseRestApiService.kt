@@ -1,5 +1,9 @@
 package com.firebase.rest.neli
 
+import com.firebase.rest.neli.auth.AccessTokenBody
+import com.firebase.rest.neli.auth.AnonymousSignIn
+import com.firebase.rest.neli.auth.AnonymousSignInResponse
+import com.firebase.rest.neli.auth.LoginBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -8,12 +12,12 @@ internal interface FirebaseRestApiService {
 
     @Headers("Content-Type:application/json")
     @POST("verifyPassword")
-    fun doLogin(@Query("key") key:String, @Body loginBody: FirebaseRestAuth.LoginBody): Call<LoginResponse>
+    fun doLogin(@Query("key") key:String, @Body loginBody: LoginBody): Call<LoginResponse>
 
     @Headers("Content-Type:application/json")
     @POST("token")
     fun getAccessToken(@Query("key") key:String,
-                       @Body accessTokenBody: FirebaseRestAuth.AccessTokenBody
+                       @Body accessTokenBody: AccessTokenBody
     ): Call<AccessTokenResponse>
 
     @GET
@@ -22,7 +26,7 @@ internal interface FirebaseRestApiService {
     @Headers("Content-Type:application/json")
     @POST
     fun doSignInAnonymous(@Url url:String, @Query("key") apiKey:String,
-                          @Body body: FirebaseRestAuth.AnonymousSignIn
+                          @Body body: AnonymousSignIn
     ): Call<AnonymousSignInResponse>
 
     @Headers("Content-Type:application/json")
