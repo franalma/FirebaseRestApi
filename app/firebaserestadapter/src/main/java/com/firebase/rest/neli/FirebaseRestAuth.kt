@@ -1,6 +1,7 @@
 package com.firebase.rest.neli
 
 import android.util.Log
+import com.firebase.rest.neli.auth.AnonymousSignInResponse
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call

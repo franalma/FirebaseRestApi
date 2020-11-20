@@ -49,6 +49,10 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
     suspend fun doLoginWithAccessToken(user: String, pass: String, returnSecureToken: Boolean) {
         auth.doLoginWithAccessToken(user, pass, returnSecureToken)
     }
+    suspend fun doLoginWithAccessToken(refreshToken:String): AccessTokenResponse =
+        auth.getAccessToken(refreshToken)
+    
+
 
     suspend fun signInAnonymous(returnSecureToken: Boolean = true) {
         auth.signInAnonymous(returnSecureToken)

@@ -47,7 +47,7 @@ internal class FirebaseRestAuth(private val apiKey: String) {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-    private suspend fun getAccessToken(refreshToken: String): AccessTokenResponse =
+     suspend fun getAccessToken(refreshToken: String): AccessTokenResponse =
         suspendCoroutine { continuation ->
             Log.d(TAG, "getAccessToken")
             val accessTokenBody = AccessTokenBody(
