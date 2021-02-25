@@ -2,39 +2,55 @@ package com.firebase.rest.api
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.firebase.rest.neli.FirebaseRestApi
+import com.firebase.rest.neli.firestore.FireStoreRestApi
+import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
-    val API_KEY_TEST = "AIzaSyBWD9_bS4mgvHw_6OPCEx_I_AI8N6DIREk"
-    val DATABASE_NAME_TEST = "https://testdtse.firebaseio.com/"
-    val firebaseRestApiTest = FirebaseRestApi(DATABASE_NAME_TEST,API_KEY_TEST)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        testAnonymousHuawei()
+
+        testFireStore()
+
+    }
+    lateinit var fireStoreRestApi:FireStoreRestApi
+
+    private fun testFireStore(){
+        val API_KEY_TEST = "AIzaSyCmkwwpis6tIrVef_-TQzrMthfutuNPHDk"
+        fireStoreRestApi = FireStoreRestApi(baseContext,"testdtse",API_KEY_TEST)
+//        this.getFromFirestore("mascotas/masc2/")
+        this.getFromFirestore("users/")
+        val item = JSONObject()
+        item.put("name", "Nela")
+            .put("date", "2")
     }
 
-    fun testAnonymousHuawei(){
+    private fun getFromFirestore(path:String){
         GlobalScope.launch {
-            delay(1000)
-            try{
-                firebaseRestApiTest.signInAnonymous()
-                var response = firebaseRestApiTest.get("")
-                println("-----$response")
-                val map = mapOf("user6" to "test6")
-//                firebaseRestApiTest.set("",map)
-                firebaseRestApiTest.set("",User("user6"))
-                response = firebaseRestApiTest.get("")
-                println("----$response")
-            }catch (e:Exception){
-                e.printStackTrace()
+            val joc =  fireStoreRestApi.get(path)
+
+            if (joc.has("documents")){
+                val jarray = joc.getJSONArray("documents")
+                for(i in 0 until jarray.length()){
+                    val gson = Gson()
+                    val jaux = jarray.getJSONObject(i)
+                    val user = gson.fromJson(jaux.getJSONObject(jaux.keys().next()).toString(), User::class.java)
+                    println("-----user name: ${user.name}")
+                }
             }
+
         }
     }
-    data class User(val name:String)
+
+    private fun setToFirestore(path:String, payload:JSONObject) {
+        GlobalScope.launch {
+            fireStoreRestApi.set(path, payload)
+        }
+    }
+
 }

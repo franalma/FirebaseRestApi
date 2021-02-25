@@ -33,4 +33,8 @@ internal interface FirebaseRestApiService {
     @PATCH
     fun setInDatabase(@Url url: String, @Query("auth")accessToken: String,
                       @Body value:Any): Call<ResponseBody>
+
+    @GET
+    fun getFromFireStore(@Url url:String): Call<String>
+
 }
