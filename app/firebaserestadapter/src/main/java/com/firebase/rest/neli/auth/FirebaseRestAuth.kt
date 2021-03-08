@@ -16,7 +16,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-internal class FirebaseRestAuth(private val apiKey: String) {
+class FirebaseRestAuth(private val apiKey: String) {
 
     private val TAG = javaClass.simpleName
 
@@ -91,6 +91,18 @@ internal class FirebaseRestAuth(private val apiKey: String) {
                 }
         }
 
+    suspend fun signInWithCustomToken (customToken:String, returnSecureToken: Boolean = true) :CustomTokenSignInResponse =
+        suspendCoroutine { continuation ->
+            Log.d(TAG, "signInWithCustomToken")
+            var fullUrl = LOGIN_URL_ANON + "accounts:signInWithCustomToken"
+            val body = CustomTokenSignInBody(customToken,returnSecureToken)
+            firebaseRestApiService(LOGIN_URL_ANON).doSignWithCustomToken(fullUrl, apiKey, body)
+                .enqueue(continuation){_,response ->
+                    Log.d(TAG, "signInAnonymousInternal: ${response.body()}")
+                    response.body()?.let { continuation.resume(it) }
+                }
+        }
+
     private fun firebaseRestApiService(url: String): FirebaseRestApiService =
         getRetroFitInstance(url).create(FirebaseRestApiService::class.java)
 
@@ -141,6 +153,8 @@ internal class FirebaseRestAuth(private val apiKey: String) {
         const val LOGIN_URL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/"
         const val LOGIN_URL_ANON = "https://identitytoolkit.googleapis.com/v1/"
         const val ACCESS_TOKEN_URL = "https://securetoken.googleapis.com/v1/"
+
+
     }
 
 }

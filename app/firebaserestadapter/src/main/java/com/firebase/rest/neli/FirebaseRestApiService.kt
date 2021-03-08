@@ -37,4 +37,11 @@ internal interface FirebaseRestApiService {
     @GET
     fun getFromFireStore(@Url url:String): Call<String>
 
+    @Headers("Content-Type:application/json")
+    @POST
+    fun doSignWithCustomToken(@Url url:String, @Query("key") apiKey:String,
+                          @Body body: CustomTokenSignInBody
+    ): Call<CustomTokenSignInResponse>
+
+
 }

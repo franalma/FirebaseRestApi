@@ -2,6 +2,7 @@ package com.firebase.rest.neli
 
 import android.util.Log
 import com.firebase.rest.neli.auth.AccessTokenResponse
+import com.firebase.rest.neli.auth.CustomTokenSignInResponse
 import com.firebase.rest.neli.auth.FirebaseRestAuth
 import com.firebase.rest.neli.auth.LoginResponse
 import okhttp3.OkHttpClient
@@ -57,6 +58,9 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
     suspend fun signInAnonymous(returnSecureToken: Boolean = true) {
         auth.signInAnonymous(returnSecureToken)
     }
+
+    suspend fun signInWithCustomToken (customToken:String, returnSecureToken: Boolean):CustomTokenSignInResponse =
+        auth.signInWithCustomToken(customToken, returnSecureToken)
 
     suspend fun get(databasePath: String): String = run {
         auth.refreshTokenIfNeeded()
