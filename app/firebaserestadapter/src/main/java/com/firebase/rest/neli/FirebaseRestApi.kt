@@ -63,6 +63,7 @@ class FirebaseRestApi(private val database: String, private val apiKey: String) 
         auth.signInWithCustomToken(customToken, returnSecureToken)
 
     suspend fun get(databasePath: String): String = run {
+
         auth.refreshTokenIfNeeded()
         auth.accessToken?.let {
             suspendCoroutine<String> { continuation ->

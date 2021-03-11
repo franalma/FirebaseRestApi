@@ -56,6 +56,8 @@ class FirebaseRestAuth(private val apiKey: String) {
             firebaseRestApiService(ACCESS_TOKEN_URL).getAccessToken(apiKey, accessTokenBody)
                 .enqueue(continuation) { _, response ->
                     response.body()?.let {
+                        accessToken = it
+                        println("----accessToken set $accessToken")
                         expiredTime = System.currentTimeMillis() + it.expiresIn * 1000
                         continuation.resume(it)
                     }
@@ -70,8 +72,11 @@ class FirebaseRestAuth(private val apiKey: String) {
                     returnSecureToken
                 )
             firebaseRestApiService(LOGIN_URL).doLogin(apiKey, loginBody).enqueue(continuation) {
-                _, response -> response.body()?.let { continuation.resume(it) }
+                _, response -> response.body()?.let {
+
+                continuation.resume(it) }
             }
+
         }
 
     fun isLogged(): Boolean = run {
@@ -123,10 +128,15 @@ class FirebaseRestAuth(private val apiKey: String) {
     private fun isTokenExpired(): Boolean = System.currentTimeMillis() > expiredTime
 
     suspend fun refreshTokenIfNeeded() {
-        if (isTokenExpired()) {
-            Log.d(TAG, "Refreshing token")
-            accessToken = accessToken?.let { getAccessToken(it.refreshToken) }
+        try{
+            if (isTokenExpired()) {
+                Log.d(TAG, "Refreshing token")
+                accessToken = accessToken?.let { getAccessToken(it.refreshToken) }
+            }
+        }catch (e:Exception){
+            e.printStackTrace()
         }
+
     }
 
     private inline fun <T> Call<T>.enqueue(
